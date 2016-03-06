@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="ru">
+    <head>
+        <meta charset="utf-8">
+        <title>Мониторинг общественной безопасности в Беларуси</title>
+        <script src="//d3js.org/d3.v3.min.js" charset="utf-8"></script>
+        <style type="text/css">
+               .text {
+            font-size: 12px;
+            font-family: sans-serif;
+            alignment-baseline: middle,
+        }
+        body {
+			width: 50%;
+		}
+        </style>
+    </head>
+    <body>
+
+<h1>Мониторинг общественной безопасности в Беларуси</h1>
+<p>Интерактивная карта показывает места, где были уничтожены дикорастущие конопля и мак. Данные собраны из оперативных сводок МВД Республики Беларусь. Проект экспериментальный, находится в стадии разработки.</p>
+
+
+<div id="map"></div>
+
+        <script type="text/javascript">
+            var w = 800;
+            var h = 600;
+        
+            var projection = d3.geo.mercator()
+                .center([27.9, 53.7])
+                .translate([400, h / 2])
+                .scale(4000);
+                                
+            var path = d3.geo.path()
+                        .projection(projection);
+            
+            var canvas = d3.select("#map")
+                            .append("svg")
+                            .attr({
+                                width: w,
+                                height: h,
+                            });
+    
+                d3.json("data/belarus1.json", function(json) {
+                    
+                    canvas.selectAll("path")
+                     .data(json.features)
+                     .enter()
+                     .append("path")
+                     .attr("d", path)
+                     .style("fill", "white")
+                     .attr("stroke", "black")
+                     .attr("opacity", "0.5");
+                    
+
+                d3.csv("data/samosad-all.csv", function(data) {
+
+                    canvas.selectAll("circle")
+                     .data(data)
+                     .enter()
+                     .append("circle")
+                     .attr({
+                        cx: function(d) { return projection([d.lon, d.lat])[0]; },
+                        cy: function(d) { return projection([d.lon, d.lat])[1]; },
+                        r: function(d) { return Math.sqrt(d.square) * 8; },
+                        fill: function(d) { return d.color; },
+                        opacity: 0.5,
+                        title: function(d) { return d.district + " район, вблизи " + d.place + ", " + d.square + " га"; },
+                    })
+
+
+                });
+
+            })
+
+        </script>
+
+<p>Помните, что согласно статье 16.1 КоАП “Посев или выращивание запрещенных к возделыванию растений или грибов, содержащих наркотические средства или психотропные вещества” без цели сбыта или изготовления наркотиков может закончиться штрафом до 20 базовых величин.</p>
+<p>Те же самые действия, но с целью сбыта, подпадают под статью 329 Уголовного кодекса и предусматривают наказание от от штрафа вплоть до тюремного срока до 15 лет с конфискацией имущества для тех, кто занимался этим повторно или в составе группы.</p>
+    </body>
+</html>
